@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ludo Dice</title>
+  <style>
+    body {
+      background: #0f172a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      font-family: sans-serif;
+      color: white;
+    }
+    .dice-container {
+      width: 130px;
+      height: 130px;
+      background: white;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      font-weight: bold;
+      color: #1e293b;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s ease;
+    }
+    .dice-container:active {
+      transform: scale(0.92);
+    }
+    .rolling {
+      animation: shake 0.4s ease infinite;
+    }
+    @keyframes shake {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(10deg); }
+      75% { transform: rotate(-10deg); }
+      100% { transform: rotate(0deg); }
+    }
+    p {
+      margin-top: 24px;
+      font-size: 18px;
+      color: #94a3b8;
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+  <div class="dice-container" id="dice" onclick="rollDice()">⚀</div>
+  <p>Dice par tap karein roll karne ke liye</p>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCGI5mvgAYLOUhy_tEQAHSf5IjyqaIq9zw",
+    authDomain: "sikkubhai-38a15.firebaseapp.com",
+    projectId: "sikkubhai-38a15",
+    storageBucket: "sikkubhai-38a15.firebasestorage.app",
+    messagingSenderId: "186187669485",
+    appId: "1:186187669485:web:be09db882bbc76dd6f11e4",
+    databaseURL: "https://sikkubhai-38a15-default-rtdb.firebaseio.com"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  const diceFaces = ["", "⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+  let forcedNumber = null;
+
+  db.ref('ludoControl/nextRoll').on('value', (snap) => {
+    forcedNumber = snap.val();
+  });
+
+  function rollDice() {
+    const dice = document.getElementById('dice');
+    dice.classList.add('rolling');
+
+    setTimeout(() => {
+      let finalRoll;
+      if (forcedNumber && forcedNumber >= 1 && forcedNumber <= 6) {
+        finalRoll = forcedNumber;
+        db.ref('ludoControl/nextRoll').set(null);
+      } else {
+        finalRoll = Math.floor(Math.random() * 6) + 1;
+      }
+      dice.classList.remove('rolling');
+      dice.innerText = diceFaces[finalRoll];
+    }, 400);
+  }
+</script>
+</body>
+</html>
